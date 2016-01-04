@@ -32,13 +32,12 @@ DARK = 0
 sunLightInfoP = B.once().concat(B.interval(oneHour))
   .flatMap -> B.fromPromise(rp("http://api.sunrise-sunset.org/json?lat="+houmConfig.latitude+"&lng="+houmConfig.longitude+"&date=today"))
   .map(JSON.parse)
-  .skipDuplicates(R.equals)
   .flatMapLatest (sunInfo) ->
     now = new Date().getTime()
     timeUntilSunrise = parseTime(sunInfo.results.civil_twilight_begin) - now
     timeUntilSunset = parseTime(sunInfo.results.civil_twilight_end) - now
-    log "Time until sunrise", timeUntilSunrise, "ms"
-    log "Time until sunset", timeUntilSunset, "ms"
+    log "Sunrise", formatRelativeTime(timeUntilSunrise)
+    log "Sunset", formatRelativeTime(timeUntilSunset)
     events = []
     if timeUntilSunrise > 0
       events.push(B.later timeUntilSunrise, LIGHT)
@@ -64,6 +63,7 @@ sunLightInfoP = B.once().concat(B.interval(oneHour))
     houmConfig.lights.forEach (light) ->
       setLight(light.id, bri)
 
+formatRelativeTime = (diff) -> moment().add(diff, "milliseconds").fromNow()
 parseTime = (str) -> moment(str + " +0000", "h:mm:ss A Z").toDate().getTime()
 
 setLight = (id, bri) ->
