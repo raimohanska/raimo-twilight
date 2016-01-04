@@ -53,7 +53,6 @@ sunLightInfoP = B.once().concat(B.interval(oneHour))
   .slidingWindow(2, 1)
   .flatMapLatest ([fst, snd]) ->
     if snd?
-      log "fading from" , fst , "to" , snd , "in" , fadeTime , "milliseconds"
       fade fst, snd, fadeTime
     else
       B.once(fst)
@@ -71,6 +70,7 @@ setLight = (id, bri) ->
   houmSocket.emit('apply/light', {_id: id, on: bri>0, bri })
 
 fade = (startBri, endBri, timeMillis) ->
+  log "fading from" , startBri , "to" , endBri , formatRelativeTime(timeMillis)
   timeStep = 1000
   steps = timeMillis / timeStep
   briStep = (endBri - startBri) / steps
