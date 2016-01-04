@@ -33,7 +33,7 @@ sunLightInfoP = B.once().concat(B.interval(oneHour))
   .flatMap -> B.fromPromise(rp("http://api.sunrise-sunset.org/json?lat="+houmConfig.latitude+"&lng="+houmConfig.longitude+"&date=today"))
   .map(JSON.parse)
   .skipDuplicates(R.equals)
-  .flatMap (sunInfo) ->
+  .flatMapLatest (sunInfo) ->
     now = new Date().getTime()
     timeUntilSunrise = parseTime(sunInfo.results.civil_twilight_begin) - now
     timeUntilSunset = parseTime(sunInfo.results.civil_twilight_end) - now
