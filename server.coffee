@@ -7,7 +7,7 @@ io = require('socket.io-client')
 log = (msg...) -> console.log new Date().toString(), msg...
 rp = require('request-promise')
 houmSocket = io('http://houmi.herokuapp.com')
-houmConnectE = B.fromEvent(houmSocket, "connect").map("HOUM").log("Connected to")
+houmConnectE = B.fromEvent(houmSocket, "connect")
 houmDisconnectE = B.fromEvent(houmSocket, "disconnect")
 houmConfig = require('./houm-config.js')
 houmLightsP = B.fromPromise(rp("https://houmi.herokuapp.com/api/site/" + houmConfig.siteKey))
@@ -23,8 +23,9 @@ configuredLightsP.forEach (lights) ->
   log "Lights configured for fading", lights
 houmConnectE.onValue =>
   houmSocket.emit('clientReady', { siteKey: houmConfig.siteKey})
+  log "Connected to HOUM"
 houmReadyP = B.once(false).concat(B.combineAsArray(houmConnectE, houmLightsP).map(true)).toProperty()
-houmReadyP.filter(B._.id) .forEach -> log "Houm ready"
+houmReadyP.filter(B._.id) .forEach -> log "HOUM ready"
 
 oneHour = 3600 * 1000
 oneMinute = 60 * 1000
