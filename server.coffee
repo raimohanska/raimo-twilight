@@ -14,15 +14,17 @@ houmLightsP = B.fromPromise(rp("https://houmi.herokuapp.com/api/site/" + houmCon
   .map(JSON.parse)
   .map(".lights")
   .map((lights) => lights.map(({name,_id})=>{name,id:_id}))
+  .toProperty()
 houmLightsP
   .forEach log, "HOUM lights found"
+configuredLightsP = houmLightsP
+  .map (houmLights) -> houmLights.filter ({id}) -> R.contains(id, houmConfig.lights.map((l) -> l.id))
+configuredLightsP.forEach (lights) ->
+  log "Lights configured for fading", lights
 houmConnectE.onValue =>
   houmSocket.emit('clientReady', { siteKey: houmConfig.siteKey})
 houmReadyP = B.once(false).concat(B.combineAsArray(houmConnectE, houmLightsP).map(true)).toProperty()
-houmReadyP.filter(B._.id)
-  .forEach ->
-    log "Houm ready"
-    log "Lights configured for fading", houmConfig.lights
+houmReadyP.filter(B._.id) .forEach -> log "Houm ready"
 
 oneHour = 3600 * 1000
 oneMinute = 60 * 1000
@@ -59,14 +61,14 @@ sunLightInfoP = B.once().concat(B.interval(oneHour))
   .skipDuplicates()
   .holdWhen(houmReadyP.not())
   .forEach (bri) ->
-    houmConfig.lights.forEach (light) ->
-      setLight(light.id, bri)
+    configuredLightsP.forEach (lights) -> lights.forEach (light) ->
+      setLight(light, bri)
 
 formatRelativeTime = (diff) -> moment().add(diff, "milliseconds").fromNow()
 parseTime = (str) -> moment(str + " +0000", "h:mm:ss A Z").toDate().getTime()
 
-setLight = (id, bri) ->
-  log "Set brightness of light", id, "to",  bri
+setLight = ({id, name}, bri) ->
+  log "Set", name, "brightness to",  bri
   houmSocket.emit('apply/light', {_id: id, on: bri>0, bri })
 
 fade = (startBri, endBri, timeMillis) ->
