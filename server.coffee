@@ -37,7 +37,7 @@ sunLightInfoP = B.once().concat(B.interval(oneHour))
   .flatMapLatest (sunInfo) ->
     now = new Date().getTime()
     timeUntilSunrise = parseTime(sunInfo.results.civil_twilight_begin) - now
-    timeUntilSunset = parseTime(sunInfo.results.civil_twilight_end) - now
+    timeUntilSunset = parseTime(sunInfo.results.sunset) - now
     log "Sunrise", formatRelativeTime(timeUntilSunrise)
     log "Sunset", formatRelativeTime(timeUntilSunset)
     events = []
