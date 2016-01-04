@@ -4,7 +4,7 @@ B = require('baconjs')
 R = require('ramda')
 moment = require 'moment'
 io = require('socket.io-client')
-log = (msg...) -> console.log new Date(), msg...
+log = (msg...) -> console.log new Date().toString(), msg...
 rp = require('request-promise')
 houmSocket = io('http://houmi.herokuapp.com')
 houmConnectE = B.fromEvent(houmSocket, "connect").map("HOUM").log("Connected to")
@@ -22,7 +22,7 @@ houmReadyP = B.once(false).concat(houmConnectE.delay(1000).map(true)).toProperty
 
 oneHour = 3600 * 1000
 oneMinute = 60 * 1000
-fadeTime = oneMinute
+fadeTime = 5 * oneMinute
 LIGHT = 255
 DARK = 0
 sunLightInfoP = B.once().concat(B.interval(oneHour))
@@ -33,8 +33,8 @@ sunLightInfoP = B.once().concat(B.interval(oneHour))
     now = new Date().getTime()
     timeUntilSunrise = parseTime(sunInfo.results.civil_twilight_begin) - now
     timeUntilSunset = parseTime(sunInfo.results.civil_twilight_end) - now
-    log "until sunrise", timeUntilSunrise
-    log "until sunset", timeUntilSunset
+    log "Time until sunrise", timeUntilSunrise, "ms"
+    log "Time until sunset", timeUntilSunset, "ms"
     events = []
     if timeUntilSunrise > 0
       events.push(B.later timeUntilSunrise, LIGHT)
@@ -63,7 +63,7 @@ sunLightInfoP = B.once().concat(B.interval(oneHour))
 parseTime = (str) -> moment(str + " +0000", "h:mm:ss A Z").toDate().getTime()
 
 setLight = (id, bri) ->
-  log "set brightness", id, "=",  bri
+  log "Set brightness of light", id, "to",  bri
   houmSocket.emit('apply/light', {_id: id, on: bri>0, bri })
 
 fade = (startBri, endBri, timeMillis) ->
