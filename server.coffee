@@ -46,6 +46,7 @@ sunLightInfoP = B.once().concat(B.interval(oneHour))
         DARK
     events.push(B.once(currentLevel))
     B.mergeAll(events)
+  .skipDuplicates()
   .slidingWindow(2, 1)
   .flatMapLatest ([fst, snd]) ->
     if snd?
