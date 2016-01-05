@@ -29,7 +29,7 @@ houmReadyP.filter(B._.id) .forEach -> log "HOUM ready"
 
 oneHour = 3600 * 1000
 oneMinute = 60 * 1000
-fadeTime = 5 * oneMinute
+fadeTime = oneHour
 LIGHT = 255
 DARK = 0
 sunLightInfoP = B.once().concat(B.interval(oneHour))
